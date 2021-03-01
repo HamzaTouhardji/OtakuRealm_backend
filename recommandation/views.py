@@ -1,42 +1,57 @@
 from django.http import HttpResponse
-#from .models import MANGA
+from django.shortcuts import render
 
+from .models import User, Manga
+from .serializers import RecommandationSerializer
+
+from rest_framework import viewsets
+from rest_framework.authentication import BasicAuthentication
+from rest_framework.permissions import IsAuthenticated
+
+"""
+Cette fonction est appelé dans la page d'acceuil. Elle affiche l'ensemble des mangas de la BDD
+"""
 def index(request):
-    message = "Salut tout le monde !"
+    message = "OTAKUREALM !"
     return HttpResponse(message)
 
-
 def listing(request):
-    listManga = ["<li>{}</li>".format(manga['name']) for manga in MANGA]
-    message = """<ul>{}</ul>""".format("\n".join(listManga))
+    # request albums
+    lesMangas = Manga.objects.all()[:12]
+    formatted_mangas = ["<li>{}</li>".format(manga.title) for manga in lesMangas]
+    message = """<ul>{}</ul>""".format("\n".join(formatted_mangas))
     return HttpResponse(message)
 
 def detail(request, manga_id):
+    lesMangas = Manga.objects.filter(id)
     id = int(manga_id) # make sure we have an integer.
     manga = MANGA[id] # get the album with its id.
-    auteur = " ".join([auteur['name'] for auteur in manga['auteur']]) # grab artists name and create a string out of it.
-    message = "Le nom du manga est {}. Il a été écrit par {}".format(manga['name'], auteur)
+    message = "Le nom du manga est {}".format(manga['name'])
     return HttpResponse(message)
+
+class RecommandationViewSet(viewsets.ModelViewSet):
+    authentication_classes = (BasicAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    queryset = Manga.objects.all()
+    serializer_class = RecommandationSerializer
 
 def search(request):
     query = request.GET.get('query')
     if not query:
-        message = "Aucun manga n'est demandé"
+        manga = Manga.objects.all()
     else:
-        listMangas = [
-            manga for manga in MANGA
-            if query in " ".join(auteur['name'] for auteur in manga['auteur'])
-        ]
-
-        if len(listMangas) == 0:
+        #title__icontains n'est pas sensible a la casse et affiche les mangas meme si on donne qu'une partie du nom du manga
+        lesMangas = Manga.objects.filter(title__icontains=query)
+        #if len(lesMangas) == 0:
+        if not lesMangas.exists():
             message = "Misère de misère, nous n'avons trouvé aucun résultat !"
         else:
-            listMangas = ["<li>{}</li>".format(manga['name']) for manga in listMangas]
+            lesMangas = ["<li>{}</li>".format(manga.title) for manga in lesMangas]
             message = """
                 Nous avons trouvé les albums correspondant à votre requête ! Les voici :
                 <ul>
                     {}
                 </ul>
-            """.format("</li><li>".join(listMangas))
+            """.format("</li><li>".join(lesMangas))
 
     return HttpResponse(message)
