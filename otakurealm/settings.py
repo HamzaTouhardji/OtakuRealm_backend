@@ -40,8 +40,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'debug_toolbar',
-    'rest_framework',
-    'corsheaders',
+
+
     'recommandation'
 ]
 
@@ -84,12 +84,12 @@ WSGI_APPLICATION = 'otakurealm.wsgi.application'
 #pip install psycopg2-binary
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql', # on utilise l'adaptateur postgresql
+        'ENGINE': 'django.db.backends.mysql', # on utilise l'adaptateur postgresql
         'NAME': 'otakurealm', # le nom de notre base de donnees creee precedemment
-        'USER': 'hamza', # attention : remplacez par votre nom d'utilisateur
-        'PASSWORD': 'hamza',
-        'HOST': '',
-        'PORT': '5432',
+        'USER': 'admin', # attention : remplacez par votre nom d'utilisateur
+        'PASSWORD': 'admin',
+        'HOST': 'localhost',
+        'PORT': '3325',
     }
 }
 

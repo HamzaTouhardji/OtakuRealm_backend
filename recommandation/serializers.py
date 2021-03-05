@@ -1,8 +1,8 @@
 from rest_framework import serializers
 
-from .models import Manga
+from .models import Anime
 
 class RecommandationSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
-        model = Manga
+        model = Anime
         fields = ('id', 'title', 'picture')

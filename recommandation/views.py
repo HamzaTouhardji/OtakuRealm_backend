@@ -1,7 +1,7 @@
 from django.http import HttpResponse
 from django.shortcuts import render
 
-from .models import User, Manga
+from .models import User, Anime
 from .serializers import RecommandationSerializer
 
 from rest_framework import viewsets
@@ -17,11 +17,11 @@ def index(request):
 
 def listing(request):
     # request albums
-    lesMangas = Manga.objects.all()[:12]
+    lesMangas = Anime.objects.all()[:12]
     formatted_mangas = ["<li>{}</li>".format(manga.title) for manga in lesMangas]
     message = """<ul>{}</ul>""".format("\n".join(formatted_mangas))
     return HttpResponse(message)
-
+"""
 def detail(request, manga_id):
     lesMangas = Manga.objects.filter(id)
     id = int(manga_id) # make sure we have an integer.
@@ -29,11 +29,13 @@ def detail(request, manga_id):
     message = "Le nom du manga est {}".format(manga['name'])
     return HttpResponse(message)
 
+
 class RecommandationViewSet(viewsets.ModelViewSet):
     authentication_classes = (BasicAuthentication,)
     permission_classes = (IsAuthenticated,)
     queryset = Manga.objects.all()
     serializer_class = RecommandationSerializer
+
 
 def search(request):
     query = request.GET.get('query')
@@ -47,11 +49,13 @@ def search(request):
             message = "Misère de misère, nous n'avons trouvé aucun résultat !"
         else:
             lesMangas = ["<li>{}</li>".format(manga.title) for manga in lesMangas]
-            message = """
+            message = ""
                 Nous avons trouvé les albums correspondant à votre requête ! Les voici :
                 <ul>
                     {}
                 </ul>
-            """.format("</li><li>".join(lesMangas))
+            "".format("</li><li>".join(lesMangas))
 
     return HttpResponse(message)
+    
+    """
