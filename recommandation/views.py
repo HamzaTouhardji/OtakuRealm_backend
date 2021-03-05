@@ -1,61 +1,72 @@
-from django.http import HttpResponse
 from django.shortcuts import render
 
-from .models import User, Anime
-from .serializers import RecommandationSerializer
-
-from rest_framework import viewsets
-from rest_framework.authentication import BasicAuthentication
-from rest_framework.permissions import IsAuthenticated
-
-"""
-Cette fonction est appelé dans la page d'acceuil. Elle affiche l'ensemble des mangas de la BDD
-"""
-def index(request):
-    message = "OTAKUREALM !"
-    return HttpResponse(message)
-
-def listing(request):
-    # request albums
-    lesMangas = Anime.objects.all()[:12]
-    formatted_mangas = ["<li>{}</li>".format(manga.title) for manga in lesMangas]
-    message = """<ul>{}</ul>""".format("\n".join(formatted_mangas))
-    return HttpResponse(message)
-"""
-def detail(request, manga_id):
-    lesMangas = Manga.objects.filter(id)
-    id = int(manga_id) # make sure we have an integer.
-    manga = MANGA[id] # get the album with its id.
-    message = "Le nom du manga est {}".format(manga['name'])
-    return HttpResponse(message)
+from django.http.response import JsonResponse
+from rest_framework.parsers import JSONParser 
+from rest_framework import status
+ 
+from recommandation.models import Anime
+from recommandation.serializers import RecommandationSerializer
+from rest_framework.decorators import api_view
 
 
-class RecommandationViewSet(viewsets.ModelViewSet):
-    authentication_classes = (BasicAuthentication,)
-    permission_classes = (IsAuthenticated,)
-    queryset = Manga.objects.all()
-    serializer_class = RecommandationSerializer
+@api_view(['GET', 'POST', 'DELETE'])
+def recommandation_list(request):
+    if request.method == 'GET':
+        animes = Anime.objects.all()
+        
+        title = request.GET.get('title', None)
+        if title is not None:
+            animes = animes.filter(title__icontains=title)
+        
+        recommandation_serializer = RecommandationSerializer(animes, many=True)
+        return JsonResponse(recommandation_serializer.data, safe=False)
+        # 'safe=False' for objects serialization
+    elif request.method == 'POST':
+        recommandation_data = JSONParser().parse(request)
+        recommandation_serializer = RecommandationSerializer(data=recommandation_data)
+        if recommandation_serializer.is_valid():
+            recommandation_serializer.save()
+            return JsonResponse(recommandation_serializer.data, status=status.HTTP_201_CREATED) 
+        return JsonResponse(recommandation_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
-def search(request):
-    query = request.GET.get('query')
-    if not query:
-        manga = Manga.objects.all()
-    else:
-        #title__icontains n'est pas sensible a la casse et affiche les mangas meme si on donne qu'une partie du nom du manga
-        lesMangas = Manga.objects.filter(title__icontains=query)
-        #if len(lesMangas) == 0:
-        if not lesMangas.exists():
-            message = "Misère de misère, nous n'avons trouvé aucun résultat !"
-        else:
-            lesMangas = ["<li>{}</li>".format(manga.title) for manga in lesMangas]
-            message = ""
-                Nous avons trouvé les albums correspondant à votre requête ! Les voici :
-                <ul>
-                    {}
-                </ul>
-            "".format("</li><li>".join(lesMangas))
-
-    return HttpResponse(message)
+ 
+@api_view(['GET', 'PUT', 'DELETE'])
+def recommandation_detail(request, pk):
+    # find tutorial by pk (id)
+    try: 
+        anime = Anime.objects.get(pk=pk) 
+    except Anime.DoesNotExist: 
+        return JsonResponse({'message': 'l\'Anime n\'exist pas'  }, status=status.HTTP_404_NOT_FOUND) 
+ 
+    #Find a single Anime with an id
+    if request.method == 'GET': 
+        recommandation_serializer = RecommandationSerializer(tutorial) 
+        return JsonResponse(recommandation_serializer.data) 
     
-    """
+    #Find a single Anime with an id
+    elif request.method == 'PUT': 
+        anime_data = JSONParser().parse(request) 
+        recommandation_serializer = RecommandationSerializer(anime, data=anime_data) 
+        if recommandation_serializer.is_valid(): 
+            recommandation_serializer.save() 
+            return JsonResponse(recommandation_serializer.data) 
+        return JsonResponse(recommandation_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    #Delete a Anime with the specified id
+    elif request.method == 'DELETE': 
+        anime.delete() 
+        return JsonResponse({'message': 'L\'animé a été supprimé!'}, status=status.HTTP_204_NO_CONTENT)
+        
+    #Delete all animes from the database
+    elif request.method == 'DELETE':
+        count = Anime.objects.all().delete()
+        return JsonResponse({'message': '{} Animes were deleted successfully!'.format(count[0])}, status=status.HTTP_204_NO_CONTENT)
+
+@api_view(['GET'])
+def recommandation_list_published(request):
+    # GET all published animes
+    anime = Anime.objects.filter(published=True)
+        
+    if request.method == 'GET': 
+        recommandation_serializer = RecommandationSerializer(anime, many=True)
+        return JsonResponse(recommandation_serializer.data, safe=False)

@@ -5,4 +5,4 @@ from .models import Anime
 class RecommandationSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Anime
-        fields = ('id', 'title', 'picture')
+        fields = ('id', 'title')

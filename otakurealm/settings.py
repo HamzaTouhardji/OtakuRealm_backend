@@ -41,13 +41,16 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'debug_toolbar',
 
-
+    #to allow requests to our Django application from other origins, like localhost:8081
+    'corsheaders',
+    #Our Application
     'recommandation'
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -73,6 +76,11 @@ TEMPLATES = [
         },
     },
 ]
+
+CORS_ORIGIN_ALLOW_ALL = False
+CORS_ORIGIN_WHITELIST = (
+    'http://localhost:8081',
+)
 
 WSGI_APPLICATION = 'otakurealm.wsgi.application'
 

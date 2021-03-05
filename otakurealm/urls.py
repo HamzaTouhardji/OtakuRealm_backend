@@ -46,8 +46,8 @@ from django.contrib import admin
 from recommandation import views
 
 urlpatterns = [
-    url(r'^$', views.index),
-    url(r'^recommandation/', include('recommandation.urls')),
+    #url(r'^$', views.index),
+    url(r'^', include('recommandation.urls')),
     url(r'^admin/', admin.site.urls)
 ]
 
