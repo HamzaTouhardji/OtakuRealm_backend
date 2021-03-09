@@ -40,7 +40,7 @@ def recommandation_detail(request, pk):
  
     #Find a single Anime with an id
     if request.method == 'GET': 
-        recommandation_serializer = RecommandationSerializer(tutorial) 
+        recommandation_serializer = RecommandationSerializer(anime) 
         return JsonResponse(recommandation_serializer.data) 
     
     #Find a single Anime with an id
@@ -61,12 +61,3 @@ def recommandation_detail(request, pk):
     elif request.method == 'DELETE':
         count = Anime.objects.all().delete()
         return JsonResponse({'message': '{} Animes were deleted successfully!'.format(count[0])}, status=status.HTTP_204_NO_CONTENT)
-
-@api_view(['GET'])
-def recommandation_list_published(request):
-    # GET all published animes
-    anime = Anime.objects.filter(published=True)
-        
-    if request.method == 'GET': 
-        recommandation_serializer = RecommandationSerializer(anime, many=True)
-        return JsonResponse(recommandation_serializer.data, safe=False)
