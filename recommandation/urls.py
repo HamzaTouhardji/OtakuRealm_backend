@@ -10,5 +10,4 @@ urlpatterns = [
     url(r'^api/recommandation$', views.recommandation_list),
     # GET, PUT, DELETE
     url(r'^api/recommandation/(?P<pk>[0-9]+)$', views.recommandation_detail),
-    #url(r'^admin/', admin.site.urls)
 ]
