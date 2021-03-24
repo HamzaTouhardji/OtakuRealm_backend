@@ -22,7 +22,7 @@ class Anime(models.Model):
 
 
 """
-class Reviews(models.Model):
+class Review(models.Model):
     id_anime = models.ManyToManyField(Anime, related_name='mangas', blank=True)
     id_user = models.ManyToManyField(User, related_name='mangas', blank=True)
     date = models.DateField(auto_now=True)
@@ -37,12 +37,22 @@ class Genre(models.Model):
     #le libellé
     wording = models.CharField(max_length=200)
     def __str__(self):
-        return self.title 
+        return self.wording 
 
 """
 class Preferer(models.Model):
     id_user = models.ManyToManyField(User, related_name='mangas', blank=True)
     id_genre = models.ManyToManyField(User, related_name='mangas', blank=True)
+
+    def __str__(self):
+        return self.title 
+"""
+
+"""
+class Recommandation(models.Model):
+    id_user = models.ManyToManyField(User, related_name='mangas', blank=True)
+    id_anime = models.ManyToManyField(User, related_name='mangas', blank=True)
+    score = models.IntegerField()
 
     def __str__(self):
         return self.title 
