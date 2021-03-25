@@ -15,11 +15,40 @@ from rest_framework.decorators import api_view
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework.response import Response
 from rest_framework.views import APIView
+#Generix Vieaw API
+from rest_framework import generics
+from rest_framework import mixins
 #authentification
-from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
-#https://www.youtube.com/watch?v=B38aDwUpcFc 1H46
 
+
+class GenericAPIView(generics.GenericAPIView, 
+        mixins.ListModelMixin, mixins.CreateModelMixin,
+        mixins.UpdateModelMixin, mixins.RetrieveModelMixin,
+        mixins.DestroyModelMixin):
+    queryset = Anime.objects.all()
+    serializer_class = AnimeSerializer
+
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    lookup_field = 'id'
+
+    def get(self, request, id = None):
+        if id: 
+            return self.retrieve(request)
+        else: 
+            return self.list(request)
+
+    def put(self, request, id=None):
+        return self.update(request, id)
+    
+    def post(self, request, id=None):
+        return self.create(request)
+        
+    def delete(self, request, id):
+        return self.destroy(request, id)
 
 class AnimeList(APIView):
     def get(self, request):

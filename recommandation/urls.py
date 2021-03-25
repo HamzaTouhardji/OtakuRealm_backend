@@ -3,11 +3,12 @@ from knox import views as knox_views
 from django.urls import path
 
 from . import views # import views so we can use them in urls.
-from .views import RegisterAPI, LoginAPI, AnimeList, AnimeDetails
+from .views import RegisterAPI, LoginAPI, AnimeList, AnimeDetails, GenericAPIView
 
 
 urlpatterns = [
     path('api/anime/', AnimeList.as_view()),
+    path('api/generic/anime/<int:id>', GenericAPIView.as_view()),
     path('api/anime/<int:id>', AnimeDetails.as_view()),
 
     path('api/register/', RegisterAPI.as_view(), name='register'),
