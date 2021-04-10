@@ -52,10 +52,10 @@ INSTALLED_APPS = [
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        # 'rest_framework.authentication.BasicAuthentication',
-        # 'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
         # 'rest_framework.authentication.TokenAuthentication',
-        'knox.auth.TokenAuthentication',
+        #'knox.auth.TokenAuthentication',
     ]
 }
 
@@ -102,7 +102,7 @@ WSGI_APPLICATION = 'otakurealm.wsgi.application'
 
 
 #pip install psycopg2-binary
-'''
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql', # on utilise l'adaptateur postgresql
@@ -112,8 +112,8 @@ DATABASES = {
         'HOST': 'localhost',
         'PORT': '3325',
     }
-}'''
-
+}
+'''
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql', 
@@ -123,7 +123,7 @@ DATABASES = {
         'HOST': 'otakurealm.mooo.com',
         'PORT': '3306',
     }
-}
+}'''
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators

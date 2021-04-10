@@ -1,10 +1,10 @@
 from rest_framework import serializers
-from.models import Anime, Genre
+from.models import Anime, Genre, Utilisateur
 from django.contrib.auth.models import User
 #from django.contrib.auth.models import User
 #from rest_framework.authtoken.models import Token
 
-class AnimeSerializer(serializers.HyperlinkedModelSerializer):
+class AnimeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Anime
         fields = (
@@ -21,8 +21,15 @@ class AnimeSerializer(serializers.HyperlinkedModelSerializer):
         #fields = '__all__'
         #extra_kwargs = {'URL': {'required':True}}
 
+# Utilisateur Serializer
+class UtilisateurSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Utilisateur
+        fields = '__all__'
+        depth = 1
+
 # Genre Serializer
-class GenreSerializer(serializers.HyperlinkedModelSerializer):
+class GenreSerializer(serializers.ModelSerializer):
   class Meta:
     model = Genre
     fields = '__all__'
@@ -31,7 +38,7 @@ class GenreSerializer(serializers.HyperlinkedModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'age')
+        fields = ('id', 'username', 'email')
 
 # Register Serializer
 class RegisterSerializer(serializers.ModelSerializer):

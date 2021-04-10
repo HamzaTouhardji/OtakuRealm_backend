@@ -6,8 +6,8 @@ from django.views.decorators.csrf import csrf_exempt
 from knox.views import LoginView as KnoxLoginView
 from knox.models import AuthToken
 
-from recommandation.serializers import AnimeSerializer, UserSerializer, RegisterSerializer
-from recommandation.models import Anime
+from recommandation.serializers import AnimeSerializer, UtilisateurSerializer, UserSerializer, RegisterSerializer, GenreSerializer
+from recommandation.models import Anime, Genre, Utilisateur
 
 from rest_framework import generics, permissions,status
 from rest_framework.parsers import JSONParser 
@@ -23,10 +23,23 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 
 
+#ListUsers
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import authentication, permissions
+from django.contrib.auth.models import User
+
+#CustomAuthToken
+from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.authtoken.models import Token
+from rest_framework.response import Response
+
+
 class GenericAPIView(generics.GenericAPIView, 
         mixins.ListModelMixin, mixins.CreateModelMixin,
         mixins.UpdateModelMixin, mixins.RetrieveModelMixin,
         mixins.DestroyModelMixin):
+
     queryset = Anime.objects.all()
     serializer_class = AnimeSerializer
 
@@ -89,7 +102,89 @@ class AnimeDetails(APIView):
     def delete(self, request, id):
         anime = self.get_object(id)
         anime.delete() 
-        return Response({'message': 'L\'animé a été supprimé! Hmaza le BOSS'}, status=status.HTTP_204_NO_CONTENT)
+        return Response({'message': 'L\'animé a été supprimé!'}, status=status.HTTP_204_NO_CONTENT)
+
+#######################################################################################
+
+class GenreList(APIView):
+    def get(self, request):
+        genres = Genre.objects.all()
+        serializer = GenreSerializer(genres, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = GenreSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED) 
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST) 
+
+#######################################################################################
+
+class UserList(APIView):
+    def get(self, request):
+        users = Utilisateur.objects.all()
+        serializer = UtilisateurSerializer(users, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED) 
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  
+
+
+
+class ListUsers(APIView):
+
+    authentication_classes = [authentication.TokenAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, format=None):
+        """
+        Return a list of all users.
+        
+        usernames = [user.username for user in User.objects.all()]
+        return Response(usernames)
+        user.bio, user.photo_de_profil, user.sexe, user.age, user.animes
+        """
+
+        """
+        usernames = [user.id for user in Utilisateur.objects.filter(id=user.id)],
+        bio = [user.bio for user in Utilisateur.objects.filter(id=user.id)]
+        photo_de_profil= [user.photo_de_profil for user in Utilisateur.objects.filter(id=user.id)]
+        sexe = [user.sexe for user in Utilisateur.objects.filter(id=user.id)]
+        age = [user.age for user in Utilisateur.objects.filter(id=user.id)]
+
+        infos = {'URL': usernames, 
+        'name': bio, 
+        'photo_de_profil': photo_de_profil, 
+        'sexe': sexe, 
+        'age': age}
+
+        """
+        user = self.request.user
+
+        usernames = {user.animes for user in Utilisateur.objects.filter(id=user.id)}
+
+        return Response(usernames)
+
+
+class CustomAuthToken(ObtainAuthToken):
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data,
+                                           context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data['user']
+        token, created = Token.objects.get_or_create(user=user)
+        return Response({
+            'token': token.key,
+            'user_id': user.pk,
+            'email': user.email
+        })
+#######################################################################################
 
 # Register API
 class RegisterAPI(generics.GenericAPIView):
@@ -115,47 +210,3 @@ class LoginAPI(KnoxLoginView):
         user = serializer.validated_data['user']
         login(request, user)
         return super(LoginAPI, self).post(request, format=None)
-
-@api_view(['GET', 'POST'])
-def anime_list(request):
-    if request.method == 'GET':
-        animes = Anime.objects.all()
-        title = request.GET.get('title', None)
-        if title is not None:
-            animes = animes.filter(title__icontains=title)
-        serializer = AnimeSerializer(animes, many=True)
-        return Response(serializer.data)
-
-    elif request.method == 'POST':
-        serializer = AnimeSerializer(data=request.data )
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED) 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
- 
-@api_view(['GET', 'PUT', 'DELETE'])
-def anime_detail(request, pk):
-    # find tutorial by pk
-    try: 
-        anime = Anime.objects.get(pk=pk) 
-    except Anime.DoesNotExist: 
-        return Response({'message': 'l\'Anime n\'existe pas'  }, status=status.HTTP_404_NOT_FOUND) 
- 
-    #Find a single Anime with an id
-    if request.method == 'GET': 
-        serializer = AnimeSerializer(anime) 
-        return Response(serializer.data) 
-    
-    #Find a single Anime with an id
-    elif request.method == 'PUT': 
-        serializer = AnimeSerializer(anime, data=request.data) 
-        if serializer.is_valid(): 
-            serializer.save() 
-            return Response(serializer.data) 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-    #Delete a Anime with the specified id
-    elif request.method == 'DELETE': 
-        anime.delete() 
-        return Response({'message': 'L\'animé a été supprimé! Hmaza le BOSS'}, status=status.HTTP_204_NO_CONTENT)
