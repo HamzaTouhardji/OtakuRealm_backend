@@ -15,6 +15,8 @@ from rest_framework.decorators import api_view
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
+from rest_framework.viewsets import ModelViewSet
 #Generix Vieaw API
 from rest_framework import generics
 from rest_framework import mixins
@@ -127,14 +129,10 @@ class UserList(APIView):
         serializer = UtilisateurSerializer(users, many=True)
         return Response(serializer.data)
 
-    def post(self, request):
-        serializer = UserSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED) 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  
-
-
+class UtilisateurViewSet (ModelViewSet):
+    serializer_class = UtilisateurSerializer
+    queryset = Utilisateur.objects.all()
+    
 
 class ListUsers(APIView):
 
@@ -142,15 +140,7 @@ class ListUsers(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request, format=None):
-        """
-        Return a list of all users.
-        
-        usernames = [user.username for user in User.objects.all()]
-        return Response(usernames)
-        user.bio, user.photo_de_profil, user.sexe, user.age, user.animes
-        """
-
-        """
+        user = self.request.user
         usernames = [user.id for user in Utilisateur.objects.filter(id=user.id)],
         bio = [user.bio for user in Utilisateur.objects.filter(id=user.id)]
         photo_de_profil= [user.photo_de_profil for user in Utilisateur.objects.filter(id=user.id)]
@@ -163,12 +153,14 @@ class ListUsers(APIView):
         'sexe': sexe, 
         'age': age}
 
-        """
-        user = self.request.user
-
-        usernames = {user.animes for user in Utilisateur.objects.filter(id=user.id)}
-
-        return Response(usernames)
+        return Response(infos)
+    
+    def post(self, request):
+        serializer = UtilisateurSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED) 
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST) 
 
 
 class CustomAuthToken(ObtainAuthToken):
