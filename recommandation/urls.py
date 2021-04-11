@@ -26,8 +26,8 @@ urlpatterns = [
     path('api/generic/anime/<int:id>', GenericAPIView.as_view()),
     path('api/anime/<int:id>', AnimeDetails.as_view()),
 
-    path('register/', RegisterAPI.as_view(), name='register'),
-    path('login/', CustomAuthToken.as_view(), name='login'),
+    path('api/register/', RegisterAPI.as_view(), name='register'),
+    path('api/login/', CustomAuthToken.as_view(), name='login'),
     
     
     
