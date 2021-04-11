@@ -7,18 +7,7 @@ from django.contrib.auth.models import User
 class AnimeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Anime
-        fields = (
-            'id', 
-            'title', 
-            'season', 
-            'score', 
-            'production_studio', 
-            'number_of_episodes', 
-            'episode_duration', 
-            'synopsis', 
-            'rating', 
-            'URL'  )
-        #fields = '__all__'
+        fields = '__all__'
         #extra_kwargs = {'URL': {'required':True}}
 
 # Utilisateur Serializer
