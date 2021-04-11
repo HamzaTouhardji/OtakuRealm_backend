@@ -53,7 +53,7 @@ class Preferer(models.Model):
 class Recommandation(models.Model):
     id_utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE)
     id_anime = models.ForeignKey(Anime, on_delete=models.CASCADE)
-    score = models.IntegerField()
+    score = models.FloatField(null=True, blank=True, default=None)
 
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)

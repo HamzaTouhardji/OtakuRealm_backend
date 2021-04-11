@@ -6,8 +6,8 @@ from django.views.decorators.csrf import csrf_exempt
 from knox.views import LoginView as KnoxLoginView
 from knox.models import AuthToken
 
-from recommandation.serializers import AnimeSerializer, UtilisateurSerializer, UserSerializer, RegisterSerializer, GenreSerializer
-from recommandation.models import Anime, Genre, Utilisateur
+from recommandation.serializers import AnimeSerializer, RecommandationSerializer, UtilisateurSerializer, UserSerializer, RegisterSerializer, GenreSerializer
+from recommandation.models import Anime, Genre, Utilisateur, Recommandation
 
 from rest_framework import generics, permissions,status
 from rest_framework.parsers import JSONParser 
@@ -132,7 +132,17 @@ class UserList(APIView):
 class UtilisateurViewSet (ModelViewSet):
     serializer_class = UtilisateurSerializer
     queryset = Utilisateur.objects.all()
+
+class RecommandationViewSet(ModelViewSet):
+
+    authentication_classes = [authentication.TokenAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = RecommandationSerializer
+    queryset = Recommandation.objects.all()
     
+    def get_queryset(self):
+        user = self.request.user.id
+        return Recommandation.objects.filter(id_utilisateur = user)
 
 class ListUsers(APIView):
 

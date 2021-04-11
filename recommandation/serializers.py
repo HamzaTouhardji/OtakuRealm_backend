@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from.models import Anime, Genre, Utilisateur
+from.models import Anime, Genre, Utilisateur, Recommandation
 from django.contrib.auth.models import User
 #from django.contrib.auth.models import User
 #from rest_framework.authtoken.models import Token
@@ -32,6 +32,12 @@ class UtilisateurSerializer(serializers.ModelSerializer):
 class GenreSerializer(serializers.ModelSerializer):
   class Meta:
     model = Genre
+    fields = '__all__'
+
+# Recommandation Serializer
+class RecommandationSerializer(serializers.ModelSerializer):
+  class Meta:
+    model = Recommandation
     fields = '__all__'
 
 # User Serializer
