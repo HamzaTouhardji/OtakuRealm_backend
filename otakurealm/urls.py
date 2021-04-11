@@ -48,7 +48,7 @@ from recommandation import views
 urlpatterns = [
     #url(r'^$', views.index),
     url(r'^', include('recommandation.urls')),
-    url(r'^admin/', admin.site.urls)
+    url(r'^api/admin/', admin.site.urls)
 ]
 
 if settings.DEBUG:
