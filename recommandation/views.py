@@ -80,7 +80,7 @@ class TopAnimeSaison(APIView):
         print(x.strftime("%m"))
         saison = 'Fall ' + str(x.year)
         '''
-        animes = Anime.objects.filter(season = 'Spring 2020')[:20]
+        animes = Anime.objects.filter(season = 'Spring 2020').order_by('score').reverse()[:20]
         serializer = AnimeSerializer(animes, many=True)
         return Response(serializer.data)
 
