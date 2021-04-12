@@ -143,15 +143,16 @@ class RecommandationViewSet(ModelViewSet):
         user = self.request.user.id
         return Recommandation.objects.filter(id_utilisateur = user)
 
+
 class InfoUser(generics.ListAPIView):
     serializer_class = UtilisateurSerializer
     authentication_classes = [authentication.TokenAuthentication]
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        user = self.request.user
-        idU = [user.id for user in Utilisateur.objects.filter(id=user.id)],
-        return Utilisateur.objects.filter(id=idU)
+        user_id = self.request.user.id
+        #idU = [user.id for user in Utilisateur.objects.filter(user=user_id)],
+        return Utilisateur.objects.filter(user=user_id)
 
 class CustomAuthToken(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
