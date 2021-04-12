@@ -15,7 +15,7 @@ router.register(r'recommandation', RecommandationViewSet)
 
 urlpatterns = [
     path('api/anime/', AnimeList.as_view()),
-    path('api/anime_allTime/', TopAnimeSaison.as_view()),
+    path('api/anime_allTime/', TopAnimeAllTime.as_view()),
     path('api/anime_saison/', TopAnimeSaison.as_view()),
     path('api/info_utilisateur/', InfoUser.as_view()),
     path('api/', include(router.urls)),
