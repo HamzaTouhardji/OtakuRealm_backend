@@ -67,7 +67,7 @@ class GenericAPIView(generics.GenericAPIView,
 
 class AnimeList(APIView):
     def get(self, request):
-        animes = Anime.objects.all()
+        animes = Anime.objects.all()[:20]
         serializer = AnimeSerializer(animes, many=True)
         return Response(serializer.data)
 
