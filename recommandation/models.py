@@ -20,8 +20,8 @@ class test(models.Model):
 
 class Anime(models.Model):
     title = models.CharField(max_length=200)
-    season = models.PositiveIntegerField()
-    score = models.IntegerField()
+    season = models.CharField(max_length=200)
+    score = models.DecimalField(max_digits=4, decimal_places=2)
     production_studio = models.CharField(max_length=200)
     number_of_episodes = models.PositiveIntegerField()
     episode_duration = models.PositiveIntegerField()
