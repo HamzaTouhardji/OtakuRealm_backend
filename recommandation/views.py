@@ -68,7 +68,7 @@ class GenericAPIView(generics.GenericAPIView,
 
 class TopAnimeAllTime(APIView):
     def get(self, request):
-        animes = Anime.objects.order_by('score')[20]
+        animes = Anime.objects.order_by('score').reverse()[:20]
         serializer = AnimeSerializer(animes, many=True)
         return Response(serializer.data)
 
