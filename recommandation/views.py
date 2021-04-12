@@ -65,6 +65,13 @@ class GenericAPIView(generics.GenericAPIView,
     def delete(self, request, id):
         return self.destroy(request, id)
 
+
+class TopAnimeAllTime(APIView):
+    def get(self, request):
+        animes = Anime.objects.order_by('score')[20]
+        serializer = AnimeSerializer(animes, many=True)
+        return Response(serializer.data)
+
 class AnimeList(APIView):
     def get(self, request):
         animes = Anime.objects.all()[:20]
