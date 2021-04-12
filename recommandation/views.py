@@ -84,6 +84,14 @@ class TopAnimeSaison(APIView):
         serializer = AnimeSerializer(animes, many=True)
         return Response(serializer.data)
 
+class TopAnimeAnnee(APIView):
+    def get(self, request):
+        array = ['2021']
+        regex = '^.*(%s).*$' % '|'.join(array)
+        animes = Anime.objects.filter(season__iregex=regex).order_by('score').reverse()[:10]
+        serializer = AnimeSerializer(animes, many=True)
+        return Response(serializer.data)
+
 class AnimeList(APIView):
     def get(self, request):
         animes = Anime.objects.all()[:20]

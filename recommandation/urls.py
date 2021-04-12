@@ -5,7 +5,7 @@ from rest_framework.routers import DefaultRouter
 from rest_framework import routers
 
 from . import views # import views so we can use them in urls.
-from .views import RegisterAPI, InfoUser,TopAnimeAllTime,TopAnimeSaison, UtilisateurViewSet, RecommandationViewSet,  LoginAPI, AnimeList, CustomAuthToken, AnimeDetails, GenericAPIView, GenreList, UserList
+from .views import RegisterAPI, InfoUser,TopAnimeAnnee, TopAnimeAllTime,TopAnimeSaison, UtilisateurViewSet, RecommandationViewSet,  LoginAPI, AnimeList, CustomAuthToken, AnimeDetails, GenericAPIView, GenreList, UserList
 
 
 router = routers.SimpleRouter()
@@ -17,6 +17,8 @@ urlpatterns = [
     path('api/anime/', AnimeList.as_view()),
     path('api/anime_allTime/', TopAnimeAllTime.as_view()),
     path('api/anime_saison/', TopAnimeSaison.as_view()),
+    path('api/anime_annee/', TopAnimeAnnee.as_view()),
+
     path('api/info_utilisateur/', InfoUser.as_view()),
     path('api/', include(router.urls)),
     path('api/token/', CustomAuthToken.as_view()),
