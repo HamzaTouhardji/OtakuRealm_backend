@@ -12,9 +12,16 @@ class AnimeSerializer(serializers.ModelSerializer):
 
 # Utilisateur Serializer
 class UtilisateurSerializer(serializers.ModelSerializer):
+    animes = AnimeSerializer(read_only=True, many=True)
     class Meta:
         model = Utilisateur
-        fields = '__all__'
+        fields = (
+            'bio', 
+            'photo_de_profil', 
+            'sexe', 
+            'age', 
+            'animes')
+
         depth = 1
 
 # Genre Serializer

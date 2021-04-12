@@ -23,7 +23,7 @@ from rest_framework import mixins
 #authentification
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
-
+from rest_framework import generics
 
 #ListUsers
 from rest_framework.views import APIView
@@ -134,7 +134,6 @@ class UtilisateurViewSet (ModelViewSet):
     queryset = Utilisateur.objects.all()
 
 class RecommandationViewSet(ModelViewSet):
-
     authentication_classes = [authentication.TokenAuthentication]
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = RecommandationSerializer
@@ -144,37 +143,16 @@ class RecommandationViewSet(ModelViewSet):
         user = self.request.user.id
         return Recommandation.objects.filter(id_utilisateur = user)
 
-class ListUsers(APIView):
-
+class InfoUser(generics.ListAPIView):
+    serializer_class = UtilisateurSerializer
     authentication_classes = [authentication.TokenAuthentication]
     permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request, format=None):
+    def get_queryset(self):
         user = self.request.user
-        usernames = [user.id for user in Utilisateur.objects.filter(id=user.id)],
-        bio = [user.bio for user in Utilisateur.objects.filter(id=user.id)]
-        photo_de_profil= [user.photo_de_profil for user in Utilisateur.objects.filter(id=user.id)]
-        sexe = [user.sexe for user in Utilisateur.objects.filter(id=user.id)]
-        age = [user.age for user in Utilisateur.objects.filter(id=user.id)]
-
-        infos = {'URL': usernames, 
-        'name': bio, 
-        'photo_de_profil': photo_de_profil, 
-        'sexe': sexe, 
-        'age': age}
-
-        return Response(infos)
-    
-    def post(self, request):
-        serializer = UtilisateurSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED) 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST) 
-
+        return Utilisateur.objects.filter(id=user.id)
 
 class CustomAuthToken(ObtainAuthToken):
-
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data,
                                            context={'request': request})
@@ -186,12 +164,12 @@ class CustomAuthToken(ObtainAuthToken):
             'user_id': user.pk,
             'email': user.email
         })
+
 #######################################################################################
 
 # Register API
 class RegisterAPI(generics.GenericAPIView):
     serializer_class = RegisterSerializer
-    
     @csrf_exempt
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -199,23 +177,12 @@ class RegisterAPI(generics.GenericAPIView):
         user = serializer.save()
         token, created = Token.objects.get_or_create(user=user)
         return Response({
-        "user": UserSerializer(user, context=self.get_serializer_context()).data,
-        "token": token.key
+            "user": UserSerializer(user, context=self.get_serializer_context()).data,
+            "token": token.key
         })
-
 
 class LoginAPI(KnoxLoginView):
     permission_classes = (permissions.AllowAny,)
-
-    """
-    @csrf_exempt
-    def post(self, request, format=None):
-        serializer = AuthTokenSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data['user']
-        login(request, user)
-        return super(LoginAPI, self).post(request, format=None)
-    """
     @csrf_exempt
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data,
