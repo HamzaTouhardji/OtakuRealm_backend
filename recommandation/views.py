@@ -151,7 +151,6 @@ class InfoUser(generics.ListAPIView):
 
     def get_queryset(self):
         user_id = self.request.user.id
-        #idU = [user.id for user in Utilisateur.objects.filter(user=user_id)],
         return Utilisateur.objects.filter(user=user_id)
 
 class CustomAuthToken(ObtainAuthToken):
