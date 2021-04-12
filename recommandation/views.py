@@ -72,6 +72,18 @@ class TopAnimeAllTime(APIView):
         serializer = AnimeSerializer(animes, many=True)
         return Response(serializer.data)
 
+import datetime
+class TopAnimeSaison(APIView):
+    def get(self, request):
+        '''
+        x = datetime.datetime.now()
+        print(x.strftime("%m"))
+        saison = 'Fall ' + str(x.year)
+        '''
+        animes = Anime.objects.filter(season = 'Spring 2020')[:20]
+        serializer = AnimeSerializer(animes, many=True)
+        return Response(serializer.data)
+
 class AnimeList(APIView):
     def get(self, request):
         animes = Anime.objects.all()[:20]
