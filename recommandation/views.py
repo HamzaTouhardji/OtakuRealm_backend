@@ -137,7 +137,7 @@ class AnimeDetails(APIView):
 
 class GenreList(APIView):
     def get(self, request):
-        genres = Genre.objects.all()
+        genres = Genre.objects.all().order_by("name")
         serializer = GenreSerializer(genres, many=True)
         return Response(serializer.data)
 
