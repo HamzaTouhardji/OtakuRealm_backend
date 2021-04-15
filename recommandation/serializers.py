@@ -10,9 +10,21 @@ class AnimeSerializer(serializers.ModelSerializer):
         fields = '__all__'
         #extra_kwargs = {'URL': {'required':True}}
 
+
+
+       
+
+# Genre Serializer
+class GenreSerializer(serializers.ModelSerializer):
+  class Meta:
+    model = Genre
+    fields = '__all__'
+
+
 # Utilisateur Serializer
 class UtilisateurSerializer(serializers.ModelSerializer):
     animes = AnimeSerializer(read_only=True, many=True)
+    genres = GenreSerializer(read_only=True, many=True)
     class Meta:
         model = Utilisateur
         fields = (
@@ -20,15 +32,10 @@ class UtilisateurSerializer(serializers.ModelSerializer):
             'photo_de_profil', 
             'sexe', 
             'age', 
-            'animes')
-
+            'animes', 
+            'genres'
+        )
         depth = 1
-
-# Genre Serializer
-class GenreSerializer(serializers.ModelSerializer):
-  class Meta:
-    model = Genre
-    fields = '__all__'
 
 # Recommandation Serializer
 class RecommandationSerializer(serializers.ModelSerializer):

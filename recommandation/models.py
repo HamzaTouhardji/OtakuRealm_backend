@@ -6,13 +6,8 @@ from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
 from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
-class Genre(models.Model):
-    #le libellé
-    name = models.CharField(max_length=200)
-    def __str__(self):
-        return self.name 
 
-class test(models.Model):
+class Genre(models.Model):
     #le libellé
     name = models.CharField(max_length=200)
     def __str__(self):
@@ -43,6 +38,7 @@ class Utilisateur(models.Model):
     sexe = models.CharField(max_length=200)
     age = models.IntegerField()
     animes = models.ManyToManyField(Anime)
+    genres = models.ManyToManyField(Genre)
 
 class Review(models.Model):
     id_anime = models.ForeignKey(Anime, on_delete=models.CASCADE)

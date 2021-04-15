@@ -5,12 +5,14 @@ from rest_framework.routers import DefaultRouter
 from rest_framework import routers
 
 from . import views # import views so we can use them in urls.
-from .views import RegisterAPI, InfoUser,TopAnimeAnnee, TopAnimeAllTime,TopAnimeSaison, UtilisateurViewSet, RecommandationViewSet,  LoginAPI, AnimeList, CustomAuthToken, AnimeDetails, GenericAPIView, GenreList, UserList
+from .views import RegisterAPI,RechercheListView, RechercheViewSet, RecipeDetailAPIView, InfoUser,TopAnimeAnnee, TopAnimeAllTime,TopAnimeSaison, UtilisateurViewSet, RecommandationViewSet,  LoginAPI, AnimeList, CustomAuthToken, AnimeDetails, GenericAPIView, GenreList, UserList
 
 
 router = routers.SimpleRouter()
-#router.register(r'info_utilisateur', UtilisateurViewSet)
-router.register(r'recommandation', RecommandationViewSet)
+router.register(r'info_utilisateur', UtilisateurViewSet, basename='utilisateur')
+router.register(r'recommandation', RecommandationViewSet, basename='recommandation')
+#router.register(r'recherche', RechercheViewSet, basename='recherche')
+
 
 
 urlpatterns = [
@@ -19,10 +21,12 @@ urlpatterns = [
     path('api/anime_saison/', TopAnimeSaison.as_view()),
     path('api/anime_annee/', TopAnimeAnnee.as_view()),
 
-    path('api/info_utilisateur/', InfoUser.as_view()),
+    path('api/recherche/', RechercheListView.as_view()),
+
+    #path('api/info_utilisateur/', InfoUser.as_view()),
     path('api/', include(router.urls)),
     path('api/token/', CustomAuthToken.as_view()),
-    
+    path('api/snippets', RecipeDetailAPIView.as_view()),
     #path('api/recommandation', InfoList.as_view()),
     #path('api/recommandation/', RecommandationViewSet.as_view()),
 
