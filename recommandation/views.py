@@ -187,7 +187,7 @@ class UserGenreList(APIView):
             '''
             return Response({
                 'status': 'OK',
-                'message': 'Ajout des genres de utilisateur.'
+                'message': data.id
             }, status=status.HTTP_200_OK)
         else : 
             return Response({
