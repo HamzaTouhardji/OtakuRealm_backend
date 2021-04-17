@@ -171,8 +171,8 @@ class UserGenreList(APIView):
     '''
     def post(self, request):
         data = request.data
-        '''
-        curent_utilisateur = Utilisateur.objects.get(user = self.request.user.id)
+        #self.request.user.id
+        curent_utilisateur = Utilisateur.objects.get(user = request.data.id)
         for genre in data["genres"]:
             if not Preferer.objects.filter(id_genre=genre["id"], id_utilisateur=curent_utilisateur.id).exists():
                 new_prefere = Preferer.objects.create(
@@ -181,7 +181,7 @@ class UserGenreList(APIView):
                 )
                 new_prefere.save()
                 serializer = PrefererSerializer(new_prefere)
-        '''
+        
         return Response({
             'status': 'OK',
             'message': self.request.user.id
