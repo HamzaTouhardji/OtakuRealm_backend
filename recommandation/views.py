@@ -171,7 +171,7 @@ class UserGenreList(APIView):
     '''
     def post(self, request):
         data = request.data
-        curent_utilisateur = Utilisateur.objects.get(user = 4)
+        curent_utilisateur = Utilisateur.objects.get(user = 6)
         for genre in data["genres"]:
             #if not Preferer.objects.filter(id_genre=genre["id"], id_utilisateur=curent_utilisateur.id).exists():
             new_prefere = Preferer.objects.create(
