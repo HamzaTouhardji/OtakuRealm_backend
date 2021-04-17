@@ -1,72 +1,28 @@
 import datetime
+import json
+import datetime
 
-from django.http.response import JsonResponse
 from django.contrib.auth import login
-from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.models import User
+from django.shortcuts import get_object_or_404
 
 from knox.views import LoginView as KnoxLoginView
 from knox.models import AuthToken
 
-from recommandation.serializers import AnimeSerializer, RecommandationSerializer, UtilisateurSerializer, UserSerializer, RegisterSerializer, GenreSerializer
-from recommandation.models import Anime, Genre, Utilisateur, Recommandation
+from recommandation.serializers import AnimeSerializer, RecommandationSerializer, PrefererSerializer, ReviewSerializer,UtilisateurSerializer, UserSerializer, RegisterSerializer, GenreSerializer
+from recommandation.models import Anime, Genre, Utilisateur, Recommandation, Preferer, Review
 
-from rest_framework import generics, permissions,status
-from rest_framework.parsers import JSONParser 
-from rest_framework.decorators import api_view
-from rest_framework.authtoken.serializers import AuthTokenSerializer
+from rest_framework import generics, permissions,status, authentication, filters
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
 from rest_framework.viewsets import ModelViewSet
-#Generix Vieaw API
-from rest_framework import generics
-from rest_framework import mixins
-#authentification
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import generics
-
-#ListUsers
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import authentication, permissions
-from django.contrib.auth.models import User
-
-#CustomAuthToken
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
-from rest_framework.response import Response
-from django.shortcuts import get_object_or_404
-from rest_framework import filters
 
-class GenericAPIView(generics.GenericAPIView, 
-        mixins.ListModelMixin, mixins.CreateModelMixin,
-        mixins.UpdateModelMixin, mixins.RetrieveModelMixin,
-        mixins.DestroyModelMixin):
-
-    queryset = Anime.objects.all()
-    serializer_class = AnimeSerializer
-
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-
-    lookup_field = 'id'
-
-    def get(self, request, id = None):
-        if id: 
-            return self.retrieve(request)
-        else: 
-            return self.list(request)
-
-    def put(self, request, id=None):
-        return self.update(request, id)
-    
-    def post(self, request, id=None):
-        return self.create(request)
-        
-    def delete(self, request, id):
-        return self.destroy(request, id)
 
 class TopAnimeAllTime(APIView):
     def get(self, request):
@@ -92,6 +48,8 @@ class TopAnimeAnnee(APIView):
         animes = Anime.objects.filter(season__iregex=regex).order_by('score').reverse()[:10]
         serializer = AnimeSerializer(animes, many=True)
         return Response(serializer.data)
+
+#######################################################################################
 
 class AnimeList(APIView):
     def get(self, request):
@@ -133,21 +91,60 @@ class AnimeDetails(APIView):
         anime.delete() 
         return Response({'message': 'L\'animé a été supprimé!'}, status=status.HTTP_204_NO_CONTENT)
 
+class UserAnimeList(APIView):
+    def get(self, request):
+        curent_utilisateur = Utilisateur.objects.get(user = self.request.user.id)
+        review = Review.objects.filter(id_utilisateur = curent_utilisateur.id)
+        serializer = ReviewSerializer(review, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        data = request.data
+        curent_utilisateur = Utilisateur.objects.get(user = self.request.user.id)
+
+        if not Review.objects.filter(id_anime=data["id_anime"], id_utilisateur=curent_utilisateur.id).exists():
+            new_review = Review.objects.create(
+                id_anime = Anime.objects.get(id = data["id_anime"]),
+                id_utilisateur = Utilisateur.objects.get(id = curent_utilisateur.id),
+                date = datetime.datetime.now(),
+                score = data["score"],
+                description = data["description"],
+            )
+            new_review.save()
+            serializer = ReviewSerializer(new_review)
+
+        return Response({
+            'status': 'OK',
+            'message': 'Ajout de la review.'
+        }, status=status.HTTP_200_OK)
+
+    def put(self, request):
+        data = request.data
+        curent_utilisateur = Utilisateur.objects.get(user = self.request.user.id)
+        Review.objects.filter(id_utilisateur=curent_utilisateur.id, id_anime=data["id_anime"])
+        Review.objects.filter(id_utilisateur=curent_utilisateur.id, id_anime=data["id_anime"]).update(score=data["score"])
+        return Response({
+            'message': 'Modification du score'
+        }, status=status.HTTP_200_OK)
+    
+    def delete(self, request):
+        data = request.data
+        curent_utilisateur = Utilisateur.objects.get(user = self.request.user.id)
+        Review.objects.filter(id_utilisateur=curent_utilisateur.id, id_anime=data["id_anime"]).delete()
+        
+        return Response(
+            {
+            'message': 'Suppression de la review'
+        },status=status.HTTP_200_OK)
+
+#######################################################################################
+
 class RechercheListView(generics.ListAPIView):
     queryset = Anime.objects.all()
     serializer_class = AnimeSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ['title']
 
-class RechercheViewSet(ModelViewSet):
-    serializer_class = AnimeSerializer
-    authentication_classes = [authentication.TokenAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get_queryset(self):
-        data = request.data
-        o = Anime.objects.filter(title__icontains=data["recherche"])
-        return o
 #######################################################################################
 
 class GenreList(APIView):
@@ -161,15 +158,57 @@ class GenreList(APIView):
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED) 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST) 
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class UserGenreList(APIView):
+    def get(self, request):
+        curent_utilisateur = Utilisateur.objects.get(user = self.request.user.id)
+        genres_prefere = Preferer.objects.filter(id_utilisateur = curent_utilisateur.id)
+        serializer = PrefererSerializer(genres_prefere, many=True)
+        return Response(serializer.data)
+
+    '''
+    La fonction ajoute les genres aimes par l'utilisateur sans redondance  
+    '''
+    def post(self, request):
+        data = request.data
+        curent_utilisateur = Utilisateur.objects.get(user = self.request.user.id)
+        for genre in data["genres"]:
+            if not Preferer.objects.filter(id_genre=genre["id"], id_utilisateur=curent_utilisateur.id).exists():
+                new_prefere = Preferer.objects.create(
+                    id_utilisateur = Utilisateur.objects.get(id = curent_utilisateur.id),
+                    id_genre = Genre.objects.get(id = genre["id"]),
+                )
+                new_prefere.save()
+                serializer = PrefererSerializer(new_prefere)
+
+        return Response({
+            'status': 'OK',
+            'message': 'Ajout des genres de utilisateur.'
+        }, status=status.HTTP_200_OK)
+
+    '''
+    La fonction ajoute les genres et supprime les anciens  
+    '''
+    def put(self, request):
+        data = request.data
+        curent_utilisateur = Utilisateur.objects.get(user = self.request.user.id)
+        Preferer.objects.filter(id_utilisateur=curent_utilisateur.id).delete()
+        for genre in data["genres"]:
+            if not Preferer.objects.filter(id_genre=genre["id"], id_utilisateur=29).exists():
+                new_prefere = Preferer.objects.create(
+                    id_utilisateur = Utilisateur.objects.get(id = curent_utilisateur.id),
+                    id_genre = Genre.objects.get(id = genre["id"]),
+                )
+                new_prefere.save()
+                serializer = PrefererSerializer(new_prefere)
+
+        return Response({
+            'status': 'Bad request',
+            'message': 'Ajout des genres de utilisateur. (avec suppression des anciens)'
+        }, status=status.HTTP_200_OK)
 
 #######################################################################################
-
-class UserList(APIView):
-    def get(self, request):
-        users = Utilisateur.objects.all()
-        serializer = UtilisateurSerializer(users, many=True)
-        return Response(serializer.data)
 
 class UtilisateurViewSet(ModelViewSet):
     serializer_class = UtilisateurSerializer
@@ -183,6 +222,7 @@ class UtilisateurViewSet(ModelViewSet):
     
     def create(self, request, *args, **kwargs):
         data = request.data
+
         new_utilisateur = Utilisateur.objects.create( 
             user = User.objects.get(id=self.request.user.id),           
             bio = data["bio"], 
@@ -190,28 +230,18 @@ class UtilisateurViewSet(ModelViewSet):
             sexe = data['sexe'], 
             age = data['age'], 
         )
-
-        for anime in data["animes"]:
-            anime_obj = Anime.objects.get(id=anime["id"])
-            new_utilisateur.animes.add(anime_obj)
-        
-        for genre in data["genres"]:
-            genre_obj = get_object_or_404(Genre, id=genre["id"])
-            #genre_obj = Genre.objects.get(id=genre["id"])
-            new_utilisateur.genres.add(anime_obj)
-
+                
         new_utilisateur.save()
         serializer = UtilisateurSerializer(new_utilisateur)
-
+        
+        
         if serializer.is_valid():
-            serializer = UtilisateurSerializer(new_utilisateur)
             return Response(serializer.data)
-        '''
-            return Response({
-                'status': 'Bad request',
-                'message': 'Account could not be created with received data.'
-            }, status=status.HTTP_400_BAD_REQUEST)
-        '''
+        return Response({
+            'status': 'Bad request',
+            'message': 'Account could not be created with received data.'
+        }, status=status.HTTP_400_BAD_REQUEST)
+        
 
     def put(self, request, *args, **kwargs):
         put_utilisateur = Utilisateur.objects.get(user=self.request.user.id)
@@ -223,17 +253,8 @@ class UtilisateurViewSet(ModelViewSet):
         put_utilisateur.photo_de_profil = data["photo_de_profil"] 
         put_utilisateur.sexe = data["sexe"] 
         put_utilisateur.age = data["age"] 
-        
-        for anime in data["animes"]:
-            anime_obj = Anime.objects.get(id=anime["id"])
-            put_utilisateur.animes.add(anime_obj)
-        
-        for genre in data["genres"]:
-            genre_obj = Genre.objects.get(id=genre["id"])
-            put_utilisateur.genres.add(genre_obj)
 
         put_utilisateur.save()
-
         serializer = UtilisateurSerializer(put_utilisateur)
 
         return Response({
@@ -250,17 +271,7 @@ class UtilisateurViewSet(ModelViewSet):
         patch_utilisateur.sexe = data.get("sexe", patch_utilisateur.sexe) 
         patch_utilisateur.age = data.get("age", patch_utilisateur.age) 
 
-        for anime in data["animes"]:
-            anime_obj = get_object_or_404(Anime, id=anime["id"])
-            anime_obj = Anime.objects.get(id=anime["id"])
-            patch_utilisateur.animes.add(anime_obj)
-        
-        for genre in data["genres"]:
-            genre_obj = Genre.objects.get(id=genre["id"])
-            patch_utilisateur.genres.add(genre_obj)
-
         patch_utilisateur.save()
-
         serializer = UtilisateurSerializer(patch_utilisateur)
 
         return Response({
@@ -277,48 +288,7 @@ class RecommandationViewSet(ModelViewSet):
         user = self.request.user.id
         return Recommandation.objects.filter(id_utilisateur = user)
 
-class InfoUser(APIView):
-    serializer_class = UtilisateurSerializer
-    authentication_classes = [authentication.TokenAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
-        
-    def get(self, request):
-        user_id = self.request.user.id
-        user = Utilisateur.objects.filter(user=user_id)
-        serializer = UtilisateurSerializer(user, many=True)
-        return Response(serializer.data)
-    
-    def post(self, request):
-            serializer = UtilisateurSerializer(data=request.data )
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED) 
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-class RecipeDetailAPIView(APIView):
-  #permission_classes = (,)
-  serializer_class = UtilisateurSerializer
-  queryset = Utilisateur.objects.all()
-
-  def put(self, request, *args, **kwargs):
-    return self.update(request, *args, **kwargs)
-
-  def update(self, serializer):
-    serializer.save(updated_by_user=self.request.user)
-
-@api_view(['PUT'])
-def snippet_detail(request, pk):
-    try:
-        snippet = Utilisateur.objects.get(id=pk)
-    except Snippet.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
-
-    if request.method == 'PUT':
-        serializer = UtilisateurSerializer(snippet, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#######################################################################################
 
 class CustomAuthToken(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
@@ -332,8 +302,6 @@ class CustomAuthToken(ObtainAuthToken):
             'user_id': user.pk,
             'email': user.email
         })
-
-#######################################################################################
 
 # Register API
 class RegisterAPI(generics.GenericAPIView):
