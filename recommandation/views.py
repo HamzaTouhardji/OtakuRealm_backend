@@ -176,7 +176,7 @@ class UserGenreList(APIView):
             #if not Preferer.objects.filter(id_genre=genre["id"], id_utilisateur=curent_utilisateur.id).exists():
         new_prefere = Preferer.objects.create(
             id_utilisateur = Utilisateur.objects.get(id = curent_utilisateur.id),
-            id_genre = Genre.objects.get(id = request.POST.get("id_genre") ),
+            id_genre = Genre.objects.get(id = request.POST["id_genre"] ),
         )
         new_prefere.save()
         serializer = PrefererSerializer(new_prefere)
