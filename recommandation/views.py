@@ -173,13 +173,13 @@ class UserGenreList(APIView):
         data = request.data
         curent_utilisateur = Utilisateur.objects.get(user = 4)
         for genre in data["genres"]:
-            if not Preferer.objects.filter(id_genre=genre["id"], id_utilisateur=curent_utilisateur.id).exists():
-                new_prefere = Preferer.objects.create(
-                    id_utilisateur = Utilisateur.objects.get(id = curent_utilisateur.id),
-                    id_genre = Genre.objects.get(id = genre["id"]),
-                )
-                new_prefere.save()
-                serializer = PrefererSerializer(new_prefere)
+            #if not Preferer.objects.filter(id_genre=genre["id"], id_utilisateur=curent_utilisateur.id).exists():
+            new_prefere = Preferer.objects.create(
+                id_utilisateur = Utilisateur.objects.get(id = curent_utilisateur.id),
+                id_genre = Genre.objects.get(id = genre["id"]),
+            )
+            new_prefere.save()
+            serializer = PrefererSerializer(new_prefere)
 
         return Response({
             'status': 'OK',
@@ -194,13 +194,13 @@ class UserGenreList(APIView):
         curent_utilisateur = Utilisateur.objects.get(user = self.request.user.id)
         Preferer.objects.filter(id_utilisateur=curent_utilisateur.id).delete()
         for genre in data["genres"]:
-            if not Preferer.objects.filter(id_genre=genre["id"], id_utilisateur=4).exists():
-                new_prefere = Preferer.objects.create(
-                    id_utilisateur = Utilisateur.objects.get(id = curent_utilisateur.id),
-                    id_genre = Genre.objects.get(id = genre["id"]),
-                )
-                new_prefere.save()
-                serializer = PrefererSerializer(new_prefere)
+            #if not Preferer.objects.filter(id_genre=genre["id"], id_utilisateur=4).exists():
+            new_prefere = Preferer.objects.create(
+                id_utilisateur = Utilisateur.objects.get(id = curent_utilisateur.id),
+                id_genre = Genre.objects.get(id = genre["id"]),
+            )
+            new_prefere.save()
+            serializer = PrefererSerializer(new_prefere)
 
         return Response({
             'status': 'Bad request',
