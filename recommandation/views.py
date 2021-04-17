@@ -170,13 +170,13 @@ class UserGenreList(APIView):
     La fonction ajoute les genres aimes par l'utilisateur sans redondance  
     '''
     def post(self, request):
-        data = request.data
+        #data = request.post.get
         curent_utilisateur = Utilisateur.objects.get(user = 6)
         #for genre in data["genres"]:
             #if not Preferer.objects.filter(id_genre=genre["id"], id_utilisateur=curent_utilisateur.id).exists():
         new_prefere = Preferer.objects.create(
             id_utilisateur = Utilisateur.objects.get(id = curent_utilisateur.id),
-            id_genre = Genre.objects.get(id = data["id_genre"]),
+            id_genre = Genre.objects.get(id = request.post.get("id_genre") ),
         )
         new_prefere.save()
         serializer = PrefererSerializer(new_prefere)
