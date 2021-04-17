@@ -121,7 +121,6 @@ class UserAnimeList(APIView):
     def put(self, request):
         data = request.data
         curent_utilisateur = Utilisateur.objects.get(user = self.request.user.id)
-        Review.objects.filter(id_utilisateur=curent_utilisateur.id, id_anime=data["id_anime"])
         Review.objects.filter(id_utilisateur=curent_utilisateur.id, id_anime=data["id_anime"]).update(score=data["score"])
         return Response({
             'message': 'Modification du score'
@@ -172,7 +171,7 @@ class UserGenreList(APIView):
     '''
     def post(self, request):
         data = request.data
-        curent_utilisateur = Utilisateur.objects.get(user = self.request.user.id)
+        curent_utilisateur = Utilisateur.objects.get(user = 4)
         for genre in data["genres"]:
             if not Preferer.objects.filter(id_genre=genre["id"], id_utilisateur=curent_utilisateur.id).exists():
                 new_prefere = Preferer.objects.create(
