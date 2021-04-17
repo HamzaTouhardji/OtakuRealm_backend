@@ -171,7 +171,8 @@ class UserGenreList(APIView):
     '''
     def post(self, request):
         data = request.data
-        if 0=0 :
+        if 0==0 :
+            
             '''
             curent_utilisateur = Utilisateur.objects.get(user = self.request.user.id)
             for genre in data["genres"]:
