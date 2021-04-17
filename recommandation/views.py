@@ -187,7 +187,7 @@ class UserGenreList(APIView):
             '''
             return Response({
                 'status': 'OK',
-                'message': data.id
+                'message': request.data
             }, status=status.HTTP_200_OK)
         else : 
             return Response({
