@@ -102,7 +102,7 @@ WSGI_APPLICATION = 'otakurealm.wsgi.application'
 
 
 #pip install psycopg2-binary
-'''
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql', # on utilise l'adaptateur postgresql
@@ -124,6 +124,7 @@ DATABASES = {
         'PORT': '3306',
     }
 }
+'''
 
 
 

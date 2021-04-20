@@ -284,8 +284,36 @@ class RecommandationViewSet(ModelViewSet):
     queryset = Recommandation.objects.all()
     
     def get_queryset(self):
-        user = self.request.user.id
-        return Recommandation.objects.filter(id_utilisateur = user)
+        curent_utilisateur = Utilisateur.objects.get(user = self.request.user.id)
+        return Recommandation.objects.filter(id_utilisateur = curent_utilisateur.id)
+    
+    def create(self, request, *args, **kwargs):
+        data = request.data
+
+        new_recommandation = Recommandation.objects.create(            
+            id_utilisateur = Utilisateur.objects.get(user=self.request.user.id),
+            id_anime = Anime.objects.get(id=data["id_anime"]),
+            score = data["score"]
+        )
+                
+        new_recommandation.save()
+        serializer = RecommandationSerializer(new_recommandation)
+        
+       
+        if serializer.is_valid:
+            return Response(serializer.data)
+        return Response({
+            'status': 'Bad request',
+            'message': 'Account could not be created with received data.'
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request, *args, **kwargs):
+        data = request.data
+        curent_utilisateur = Utilisateur.objects.get(user = self.request.user.id)
+        Recommandation.objects.filter(id_utilisateur=curent_utilisateur.id, id_anime=data["id_anime"]).update(score=data["score"])
+        return Response({
+            'message': 'Modification de la recommandation'
+        }, status=status.HTTP_200_OK)
 
 #######################################################################################
 
