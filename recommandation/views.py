@@ -246,8 +246,8 @@ class UtilisateurViewSet(ModelViewSet):
 
     def put(self, request, *args, **kwargs):
         put_utilisateur = Utilisateur.objects.get(user=self.request.user.id)
-
         data = request.data
+        
 
         put_utilisateur.user = User.objects.get(id=self.request.user.id)
         put_utilisateur.bio = data["bio"] 
@@ -256,7 +256,7 @@ class UtilisateurViewSet(ModelViewSet):
         put_utilisateur.age = data["age"] 
 
         put_utilisateur.save()
-        serializer = UtilisateurSerializer(put_utilisateur)
+        #serializer = UtilisateurSerializer(put_utilisateur)
 
         return Response({
                 'message': 'Utilisateur modifié'
@@ -316,6 +316,20 @@ class RecommandationViewSet(ModelViewSet):
         return Response({
             'message': 'Modification de la recommandation'
         }, status=status.HTTP_200_OK)
+
+class UserInfo(APIView):
+    def get(self, request):
+        animes = User.objects.filter(id=self.request.user.id)
+        serializer = UserSerializer(animes, many=True)
+        return Response(serializer.data)
+
+    def put(self, request):
+        data = request.data
+        return Response({
+            User.objects.filter(id=self.request.user.id).update(username=data["pseudo"])
+        }, status=status.HTTP_200_OK)
+            
+
 
 #######################################################################################
 

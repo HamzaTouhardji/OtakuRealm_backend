@@ -52,7 +52,7 @@ class RecommandationSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'username', 'email')
+        fields = ('username', 'email')
 
 # Register Serializer
 class RegisterSerializer(serializers.ModelSerializer):
