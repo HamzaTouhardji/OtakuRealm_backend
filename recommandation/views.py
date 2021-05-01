@@ -10,7 +10,7 @@ from django.shortcuts import get_object_or_404
 from knox.views import LoginView as KnoxLoginView
 from knox.models import AuthToken
 
-from recommandation.serializers import AnimeSerializer, RecommandationSerializer, PrefererSerializer, ReviewSerializer,UtilisateurSerializer, UserSerializer, RegisterSerializer, GenreSerializer
+from recommandation.serializers import AnimeSerializer, RecommandationSerializer, AnimeSerializerFilter, PrefererSerializer, ReviewSerializer,UtilisateurSerializer, UserSerializer, RegisterSerializer, GenreSerializer
 from recommandation.models import Anime, Genre, Utilisateur, Recommandation, Preferer, Review
 
 from rest_framework import generics, permissions,status, authentication, filters
@@ -27,7 +27,7 @@ from rest_framework.authtoken.models import Token
 class TopAnimeAllTime(APIView):
     def get(self, request):
         animes = Anime.objects.order_by('score').reverse()[:10]
-        serializer = AnimeSerializer(animes, many=True)
+        serializer = AnimeSerializerFilter(animes, many=True)
         return Response(serializer.data)
 
 class TopAnimeSaison(APIView):
@@ -38,7 +38,7 @@ class TopAnimeSaison(APIView):
         saison = 'Fall ' + str(x.year)
         '''
         animes = Anime.objects.filter(season = 'Spring 2021').order_by('score').reverse()[:10]
-        serializer = AnimeSerializer(animes, many=True)
+        serializer = AnimeSerializerFilter(animes, many=True)
         return Response(serializer.data)
 
 class TopAnimeAnnee(APIView):
@@ -46,7 +46,7 @@ class TopAnimeAnnee(APIView):
         array = ['2021']
         regex = '^.*(%s).*$' % '|'.join(array)
         animes = Anime.objects.filter(season__iregex=regex).order_by('score').reverse()[:10]
-        serializer = AnimeSerializer(animes, many=True)
+        serializer = AnimeSerializerFilter(animes, many=True)
         return Response(serializer.data)
 
 #######################################################################################
@@ -208,7 +208,7 @@ class UserGenreList(APIView):
         }, status=status.HTTP_200_OK)
 
 #######################################################################################
-
+from rest_framework.renderers import JSONRenderer
 class UtilisateurViewSet(ModelViewSet):
     serializer_class = UtilisateurSerializer
     authentication_classes = [authentication.TokenAuthentication]
@@ -216,8 +216,10 @@ class UtilisateurViewSet(ModelViewSet):
     
     def get_queryset(self):
         user_id = self.request.user.id
+        u = User.objects.get(id = user_id)
         user = Utilisateur.objects.filter(user=user_id)
         return user
+
     
     def create(self, request, *args, **kwargs):
         data = request.data
@@ -338,6 +340,18 @@ class RegisterAPI(generics.GenericAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
+
+        new_utilisateur = Utilisateur.objects.create( 
+            user = User.objects.get(id=user.id),           
+            bio = "", 
+            photo_de_profil = "https://journalmetro.com/wp-content/uploads/2017/04/default_profile_400x400.png?w=860", 
+            sexe = "", 
+            age = None, 
+        )
+                
+        new_utilisateur.save()
+        serializer = UtilisateurSerializer(new_utilisateur)
+        
         token, created = Token.objects.get_or_create(user=user)
         return Response({
             "user": UserSerializer(user, context=self.get_serializer_context()).data,

@@ -9,6 +9,16 @@ class AnimeSerializer(serializers.ModelSerializer):
         model = Anime
         fields = '__all__'
         #extra_kwargs = {'URL': {'required':True}}
+    
+class AnimeSerializerFilter(serializers.ModelSerializer):
+    class Meta:
+        model = Anime
+        fields = (
+            'id',
+            'URL', 
+            'title', 
+        )
+        depth = 1
 
 # Genre Serializer
 class GenreSerializer(serializers.ModelSerializer):

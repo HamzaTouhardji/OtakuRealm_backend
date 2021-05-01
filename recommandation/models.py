@@ -32,10 +32,10 @@ class Anime(models.Model):
 
 class Utilisateur(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    bio = models.TextField()
+    bio = models.TextField(null=True)
     photo_de_profil = models.CharField(max_length=200)
-    sexe = models.CharField(max_length=200)
-    age = models.IntegerField()
+    sexe = models.CharField(max_length=200, null=True)
+    age = models.IntegerField(null=True)
 	
 class Review(models.Model):
     id_anime = models.ForeignKey(Anime, on_delete=models.CASCADE)
