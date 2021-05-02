@@ -46,7 +46,7 @@ class UtilisateurSerializer(serializers.ModelSerializer):
 class RecommandationSerializer(serializers.ModelSerializer):
   class Meta:
     model = Recommandation
-    fields = '__all__'
+    fields = ('score', 'id_anime')
 
 # User Serializer
 class UserSerializer(serializers.ModelSerializer):

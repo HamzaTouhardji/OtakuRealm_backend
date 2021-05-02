@@ -286,8 +286,9 @@ class RecommandationViewSet(ModelViewSet):
     queryset = Recommandation.objects.all()
     
     def get_queryset(self):
+
         curent_utilisateur = Utilisateur.objects.get(user = self.request.user.id)
-        return Recommandation.objects.filter(id_utilisateur = curent_utilisateur.id)
+        return Recommandation.objects.filter(id_utilisateur = curent_utilisateur.id).order_by('score').reverse()[:10]
     
     def create(self, request, *args, **kwargs):
         data = request.data

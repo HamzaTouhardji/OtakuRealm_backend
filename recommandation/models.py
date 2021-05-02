@@ -53,6 +53,7 @@ class Recommandation(models.Model):
     id_anime = models.ForeignKey(Anime, on_delete=models.CASCADE)
     score = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True, default=None)
 
+
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_auth_token(sender, instance=None, created=False, **kwargs):
     if created:
