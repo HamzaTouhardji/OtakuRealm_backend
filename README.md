@@ -12,7 +12,7 @@ pip install django
 pip install djangorestframework
 ```
 
-### Make migrations 
+### Make the migrations 
 ```
 python manage.py makemigrations
 ```
