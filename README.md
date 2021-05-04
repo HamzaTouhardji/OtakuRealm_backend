@@ -9,7 +9,6 @@ source env/bin/activate
 ### Install Django and Django REST framework
 ```
 pip install django
-
 pip install djangorestframework
 ```
 
